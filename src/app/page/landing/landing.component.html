@@ -1,4 +1,7 @@
+<video class="videobox canvasbox" autoplay="autoplay" #webcam class="webcam-source"></video>
 <canvas #canvasDigit class="canvas-digit"></canvas>
+<canvas #canvasHand class="canvas-digit"></canvas>
 <mat-slider *ngFor="let slider of sliders" [min]="slider.min" [max]="slider.max" step="0.01"
   (input)="slideSlider(slider, $event)" [value]="slider.value" [thumbLabel]="true">
 </mat-slider>
+<button (click)="toggleVideo()">Toggle video</button>

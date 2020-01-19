@@ -1,13 +1,31 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { loadLayersModel, LayersModel, tensor, Tensor, Rank } from '@tensorflow/tfjs';
-import { select } from 'd3';
 import { MatSliderChange } from '@angular/material/slider';
+import * as handTrack from 'handtrackjs';
 
 interface Slider {
   min: number;
   max: number;
   value: number;
 }
+
+interface HandPrediction {
+  bbox: [number, number, number, number]; // x, y, width, height
+  class: 'hand';
+  score: number;
+}
+
+const handModelParams = {
+  flipHorizontal: true,   // flip e.g for video
+  imageScaleFactor: 0.5,  // reduce input image size for gains in speed.
+  maxNumBoxes: 2,        // maximum number of boxes to detect
+  iouThreshold: 0.5,      // ioU threshold for non-max suppression
+  scoreThreshold: 0.6,    // confidence threshold for predictions.
+};
+
+let isVideo = false;
+const SLIDER_THRESHOLD = 4;
+const HAND_SCORE_THRESHOLD = 0.6;
 
 @Component({
   selector: 'app-landing',
@@ -16,14 +34,19 @@ interface Slider {
 })
 export class LandingComponent implements OnInit {
   decoder: LayersModel;
-  sliders: Slider[] = [...Array(4)].map(() => ({ min: -3, max: 3, value: 0 }));
-  @ViewChild('canvasDigit', { static: false }) canvas: ElementRef;
+  handModel;
+  sliders: Slider[] = [...Array(4)].map(() => ({ min: -SLIDER_THRESHOLD, max: SLIDER_THRESHOLD, value: 0 }));
+  @ViewChild('canvasDigit', { static: false }) canvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvasHand', { static: false }) canvasHand: ElementRef<HTMLCanvasElement>;
+  @ViewChild('webcam', { static: false }) video: ElementRef<HTMLVideoElement>;
+
   constructor() {
 
   }
 
   ngOnInit() {
     this.loadModel().then(() => this.predict());
+    handTrack.load(handModelParams).then(m => { console.log('Model loaded'); this.handModel = m; });
   }
 
   async loadModel() {
@@ -52,4 +75,63 @@ export class LandingComponent implements OnInit {
       }
     }
   }
+
+  startVideo() {
+    handTrack.startVideo(this.video.nativeElement).then((status) => {
+      console.log('video started', status);
+      if (status) {
+        console.log('Video started. Now tracking');
+        isVideo = true;
+        this.runDetection();
+      } else {
+        console.log('Please enable video');
+      }
+    });
+  }
+
+  toggleVideo() {
+    if (!isVideo) {
+      console.log('Starting video');
+      this.startVideo();
+    } else {
+      console.log('Stopping video');
+      handTrack.stopVideo(this.video.nativeElement);
+      isVideo = false;
+      console.log('Video stopped');
+    }
+  }
+
+  runDetection() {
+    this.handModel.detect(this.video.nativeElement).then((predictions: HandPrediction[]) => {
+      const canvasWidth = this.canvasHand.nativeElement.width;
+      const canvasHeight = this.canvasHand.nativeElement.height;
+      predictions
+        .filter(p => p.score >= HAND_SCORE_THRESHOLD)
+        .slice(0, 2).forEach((p, i) => {
+          const [x, y, width, height] = p.bbox;
+          const newLatentX = (x + width / 2 - canvasWidth / 2) / canvasWidth * SLIDER_THRESHOLD * 2.3;
+          const newLatentY = (y + height / 2 - canvasHeight / 2) / canvasHeight * SLIDER_THRESHOLD * 2.3;
+          const [x1, y1, x2, y2] = this.sliders.map(s => s.value);
+          const sliderDistanceFromHand = [[x1, y1], [x2, y2]]
+            .map(([sliderX, sliderY]) => Math.hypot(sliderX - newLatentX, sliderY - newLatentY));
+          const startSliderIndex = sliderDistanceFromHand[0] < sliderDistanceFromHand[1] ? 0 : 2;
+          this.sliders[startSliderIndex] = {
+            ...this.sliders[startSliderIndex],
+            value: newLatentX
+          };
+          this.sliders[startSliderIndex + 1] = {
+            ...this.sliders[startSliderIndex + 1],
+            value: newLatentY
+          };
+        });
+      const canvas = this.canvasHand.nativeElement;
+      this.handModel.renderPredictions(predictions, canvas, canvas.getContext('2d'), this.video.nativeElement);
+      this.predict();
+      if (isVideo) {
+        requestAnimationFrame(() => this.runDetection());
+      }
+    });
+  }
+
 }
+
