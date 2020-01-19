@@ -20,11 +20,10 @@ const handModelParams = {
   imageScaleFactor: 0.5,  // reduce input image size for gains in speed.
   maxNumBoxes: 2,        // maximum number of boxes to detect
   iouThreshold: 0.5,      // ioU threshold for non-max suppression
-  scoreThreshold: 0.6,    // confidence threshold for predictions.
+  scoreThreshold: 0.7,    // confidence threshold for predictions.
 };
 
-let isVideo = false;
-const SLIDER_THRESHOLD = 4;
+const SLIDER_THRESHOLD = 3.5;
 const HAND_SCORE_THRESHOLD = 0.6;
 
 @Component({
@@ -35,6 +34,7 @@ const HAND_SCORE_THRESHOLD = 0.6;
 export class LandingComponent implements OnInit {
   decoder: LayersModel;
   handModel;
+  isVideo = false;
   sliders: Slider[] = [...Array(4)].map(() => ({ min: -SLIDER_THRESHOLD, max: SLIDER_THRESHOLD, value: 0 }));
   @ViewChild('canvasDigit', { static: false }) canvas: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasHand', { static: false }) canvasHand: ElementRef<HTMLCanvasElement>;
@@ -81,7 +81,7 @@ export class LandingComponent implements OnInit {
       console.log('video started', status);
       if (status) {
         console.log('Video started. Now tracking');
-        isVideo = true;
+        this.isVideo = true;
         this.runDetection();
       } else {
         console.log('Please enable video');
@@ -90,13 +90,13 @@ export class LandingComponent implements OnInit {
   }
 
   toggleVideo() {
-    if (!isVideo) {
+    if (!this.isVideo) {
       console.log('Starting video');
       this.startVideo();
     } else {
       console.log('Stopping video');
       handTrack.stopVideo(this.video.nativeElement);
-      isVideo = false;
+      this.isVideo = false;
       console.log('Video stopped');
     }
   }
@@ -127,7 +127,7 @@ export class LandingComponent implements OnInit {
       const canvas = this.canvasHand.nativeElement;
       this.handModel.renderPredictions(predictions, canvas, canvas.getContext('2d'), this.video.nativeElement);
       this.predict();
-      if (isVideo) {
+      if (this.isVideo) {
         requestAnimationFrame(() => this.runDetection());
       }
     });

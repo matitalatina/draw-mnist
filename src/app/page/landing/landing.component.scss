@@ -1,8 +1,20 @@
 .canvas-digit {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
+  margin-left: 150px;
+}
+
+.canvas-hand {
+  width: 300px;
 }
 
 .webcam-source {
   display: none;
+}
+
+.content-wrapper {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
 }
