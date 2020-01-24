@@ -18,3 +18,31 @@
   align-items: center;
   justify-content: center;
 }
+
+.spinner-wrapper {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.spinner-label {
+  text-align: center;
+  font-size: 22px;
+  margin-top: 64px;
+}
+
+.webcam-content {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.latent-content {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+}

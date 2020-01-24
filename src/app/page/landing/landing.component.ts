@@ -36,6 +36,7 @@ export class LandingComponent implements OnInit {
   handModel;
   isVideo = false;
   sliders: Slider[] = [...Array(4)].map(() => ({ min: -SLIDER_THRESHOLD, max: SLIDER_THRESHOLD, value: 0 }));
+  isLoading = false;
   @ViewChild('canvasDigit', { static: false }) canvas: ElementRef<HTMLCanvasElement>;
   @ViewChild('canvasHand', { static: false }) canvasHand: ElementRef<HTMLCanvasElement>;
   @ViewChild('webcam', { static: false }) video: ElementRef<HTMLVideoElement>;
@@ -45,8 +46,14 @@ export class LandingComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadModel().then(() => this.predict());
-    handTrack.load(handModelParams).then(m => { console.log('Model loaded'); this.handModel = m; });
+    this.isLoading = true;
+    Promise.all([
+      this.loadModel(),
+      handTrack.load(handModelParams).then(m => { console.log('Model loaded'); this.handModel = m; }),
+    ]).then(() => {
+      this.isLoading = false;
+      setTimeout(() => this.predict(), 0);
+    });
   }
 
   async loadModel() {

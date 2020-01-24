@@ -1,12 +1,24 @@
-<video class="videobox canvasbox" autoplay="autoplay" #webcam class="webcam-source"></video>
+<ng-template #spinner>
+  <div class="spinner-wrapper">
+    <app-spinner></app-spinner>
+    <div class="spinner-label">
+      Loading the magic...
+    </div>
+  </div>
+</ng-template>
 
-<div class="content-wrapper">
-  <button mat-fab aria-label="Toggle webcam" (click)="toggleVideo()">
-    <mat-icon>{{isVideo ? 'stop': 'photo_camera'}}</mat-icon>
-  </button>
+<div class="content-wrapper" *ngIf="!isLoading; else spinner">
+  <div class="webcam-content">
+    <video class="videobox canvasbox" autoplay="autoplay" #webcam class="webcam-source"></video>
+    <button mat-fab aria-label="Toggle webcam" (click)="toggleVideo()">
+      <mat-icon>{{isVideo ? 'stop': 'photo_camera'}}</mat-icon>
+    </button>
+    <canvas #canvasHand class="canvas-hand"></canvas>
+  </div>
   <canvas #canvasDigit class="canvas-digit"></canvas>
-  <canvas #canvasHand class="canvas-hand"></canvas>
-  <mat-slider *ngFor="let slider of sliders" [min]="slider.min" [max]="slider.max" step="0.01"
-    (input)="slideSlider(slider, $event)" [value]="slider.value" [thumbLabel]="true">
-  </mat-slider>
+  <div class="latent-content">
+    <mat-slider *ngFor="let slider of sliders" [min]="slider.min" [max]="slider.max" step="0.01"
+      (input)="slideSlider(slider, $event)" [value]="slider.value" [thumbLabel]="true">
+    </mat-slider>
+  </div>
 </div>
