@@ -6,6 +6,7 @@
 
 .canvas-hand {
   width: 300px;
+  margin: 16px 0;
 }
 
 .webcam-source {
@@ -14,9 +15,11 @@
 
 .content-wrapper {
   display: flex;
-  flex-flow: column;
+  flex-flow: row;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+  height: 100%;
 }
 
 .spinner-wrapper {
@@ -45,4 +48,11 @@
   flex-flow: row;
   align-items: center;
   justify-content: center;
+}
+
+.params-wrapper {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
 }
