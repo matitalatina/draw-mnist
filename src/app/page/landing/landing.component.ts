@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { loadLayersModel, LayersModel, tensor, Tensor, Rank } from '@tensorflow/tfjs';
 import { MatSliderChange } from '@angular/material/slider';
 import * as handTrack from 'handtrackjs';
+import { zoomInOnEnterAnimation, fadeOutOnLeaveAnimation, tadaOnEnterAnimation } from 'angular-animations';
 
 interface Slider {
   min: number;
@@ -29,7 +30,12 @@ const HAND_SCORE_THRESHOLD = 0.6;
 @Component({
   selector: 'app-landing',
   templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.scss']
+  styleUrls: ['./landing.component.scss'],
+  animations: [
+    zoomInOnEnterAnimation(),
+    fadeOutOnLeaveAnimation(),
+    tadaOnEnterAnimation({ delay: 1000 }),
+  ],
 })
 export class LandingComponent implements OnInit {
   decoder: LayersModel;

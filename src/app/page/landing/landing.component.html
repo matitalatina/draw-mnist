@@ -7,12 +7,12 @@
   </div>
 </ng-template>
 
-<div class="content-wrapper" *ngIf="!isLoading; else spinner">
+<div class="content-wrapper" *ngIf="!isLoading; else spinner" [@fadeOutOnLeave] [@zoomInOnEnter]>
   <canvas #canvasDigit class="canvas-digit"></canvas>
   <div class="params-wrapper">
     <div class="webcam-content">
       <video class="videobox canvasbox" autoplay="autoplay" #webcam class="webcam-source"></video>
-      <button mat-fab aria-label="Toggle webcam" (click)="toggleVideo()">
+      <button mat-fab aria-label="Toggle webcam" (click)="toggleVideo()" [@tadaOnEnter]>
         <mat-icon>{{isVideo ? 'stop': 'photo_camera'}}</mat-icon>
       </button>
       <canvas #canvasHand class="canvas-hand"></canvas>
